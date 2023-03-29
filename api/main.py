@@ -2,6 +2,17 @@ import uvicorn
 from fastapi import FastAPI
 from routes import router
 
+tags_metadata = [
+    {
+        "name": "Status",
+        "description": "Check API status",
+    },
+    {
+        "name": "Products",
+        "description": "Create, Read, Update, and Delete product entries.",
+    },
+]
+
 app = FastAPI(
     title="BC Web Application Manager",
     description="Backend API for my attempt at the IS 24 Full Stack Developer Posting",
@@ -12,6 +23,7 @@ app = FastAPI(
         "name": "Tyler Smith",
         "email": "tylerkodey@me.com",
     },
+    openapi_tags=tags_metadata
 )
 
 app.include_router(router, prefix="/api")
