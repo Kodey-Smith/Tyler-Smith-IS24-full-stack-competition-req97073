@@ -39,7 +39,7 @@ async def get_products_by_filters(product_name: str = None,
             return False
         elif scrum_master_name is not None and scrum_master_name != product["scrumMasterName"]:
             return False
-        elif str(start_date) is not None and str(start_date) != product["startDate"]:
+        elif start_date is not None and str(start_date) != product["startDate"]:
             return False
         elif methodology is not None and methodology != product["methodology"]:
             return False
