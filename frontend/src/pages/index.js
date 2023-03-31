@@ -144,7 +144,10 @@ const IndexPage = () => {
               </tr>
             </thead>
             <tbody>
-              {isAddingProduct ? <AddProductMenu setErrorAndWait={setErrorAndWait} setIsAddingProduct={setIsAddingProduct}></AddProductMenu> : null}
+              {isAddingProduct ? <AddProductMenu
+                setErrorAndWait={setErrorAndWait}
+                setIsAddingProduct={setIsAddingProduct}
+                fetchProducts={fetchProducts}></AddProductMenu> : null}
               {/* Render product entries */}
               {(filteredProducts === null ? products : filteredProducts).map(
                 (product) => (

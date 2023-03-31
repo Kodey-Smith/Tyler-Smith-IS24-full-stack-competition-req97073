@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import Response, PlainTextResponse
 from schemas import Product, ProductUpdate, NewProduct
 from database import data as db
+import database
 
 # Create a new FastAPI router instance
 router = APIRouter()
@@ -83,7 +84,7 @@ async def create_product(response: Response, product: NewProduct) -> Product:
     new_product = jsonable_encoder(product)
     new_product["productId"] = latest_id
     db[str(latest_id)] = new_product
-    # await database.save_data()
+    await database.save_data()
     return new_product
 
 
@@ -100,7 +101,7 @@ async def update_product_information(product_id: int, product: ProductUpdate) ->
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found!")
     else:
-        # await database.save_data()
+        await database.save_data()
         return db[str(product_id)]
 
 
@@ -109,8 +110,8 @@ async def update_product_information(product_id: int, product: ProductUpdate) ->
 async def delete_product_by_id(product_id: int) -> Response:
     try:
         db.pop(str(product_id))  # Remove item with given ID
-        # await database.save_data()
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found!")
     else:
+        await database.save_data()
         return Response(status_code=200)

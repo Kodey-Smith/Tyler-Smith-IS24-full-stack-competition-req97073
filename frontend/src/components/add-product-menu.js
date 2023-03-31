@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function AddProductMenu({setErrorAndWait, setIsAddingProduct}) {
+function AddProductMenu({setErrorAndWait, setIsAddingProduct, fetchProducts}) {
   // Define state used for stacking and applying edits
   const [editedProduct, setEditedProduct] = useState({
     "developers": [
@@ -72,6 +72,7 @@ function AddProductMenu({setErrorAndWait, setIsAddingProduct}) {
         return res.json();
       })
       .then(setIsAddingProduct(false))
+      .then(fetchProducts())
       .catch((error) => {
         // If this fails, display an error and reload data once api healthy again.
         setErrorAndWait(
