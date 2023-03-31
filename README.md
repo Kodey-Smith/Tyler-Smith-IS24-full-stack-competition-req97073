@@ -18,14 +18,14 @@ Open a terminal and navigate to the directory you wish to download the project t
 
 Open a new terminal/command prompt, ``cd`` back to the downloaded repo and run:
  - ``cd api``
- - ``python main.py`` (You may need to use ``python3`` in place of ``python``
+ - ``python main.py`` (You may need to use ``python3`` in place of ``python``)
 
-You should now be able to access api documentation at:
+You should now be able to access api documentation in your web browser at:
  - Swagger: http://localhost:3000/api/api-docs
  - Redoc: http://localhost:3000/api/redoc
  - OpenAPI: http://localhost:3000/openapi.json
 
-You can access the frontend at:
+You can access the frontend in the same way at:
  - Production: http://localhost:9000/
  - Development: http://localhost:8000/
 
