@@ -53,6 +53,36 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
 
   // Save button clicked
   const handleSave = () => {
+    const {
+      developers,
+      methodology,
+      productName,
+      productOwnerName,
+      scrumMasterName,
+      startDate,
+    } = editedProduct;
+
+    // Check if any fields are empty.
+    const emptyDevs = developers.filter(
+      (developer) => developer.trim().length === 0
+    );
+    const requiredFields = [
+      methodology,
+      productName,
+      productOwnerName,
+      scrumMasterName,
+      startDate,
+    ];
+    const hasEmptyFields =
+      emptyDevs.length > 0 ||
+      requiredFields.some((field) => field.trim().length === 0) ||
+      developers.length === 0;
+
+    if (hasEmptyFields) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
     // Send POST to BCWS API with updated information
     fetch(`http://localhost:3000/api/products/${product.productId}`, {
       method: "POST",

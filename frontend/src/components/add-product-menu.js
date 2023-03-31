@@ -79,7 +79,7 @@ function AddProductMenu({
       return;
     }
 
-    // Send POST to BCWS API with updated information
+    // Send PUT to BCWS API with updated information
     fetch("http://localhost:3000/api/products", {
       method: "PUT",
       headers: {

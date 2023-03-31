@@ -42,9 +42,10 @@ const IndexPage = () => {
           fetchProducts();
           setError(null);
           clearInterval(pingIntervalId.current);
+          console.log("Reconnected!")
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log("Trying again in 5 seconds..."));
   }, [fetchProducts]);
 
 
