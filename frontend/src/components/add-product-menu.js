@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 
-function AddProductMenu({setErrorAndWait, setIsAddingProduct, fetchProducts}) {
+function AddProductMenu({
+  setErrorAndWait,
+  setIsAddingProduct,
+  fetchProducts,
+}) {
   // Define state used for stacking and applying edits
   const [editedProduct, setEditedProduct] = useState({
-    "developers": [
-      ""
-    ],
-    "methodology": "",
-    "productName": "",
-    "productOwnerName": "",
-    "scrumMasterName": "",
-    "startDate": "1970-01-01"
+    developers: [""],
+    methodology: "",
+    productName: "",
+    productOwnerName: "",
+    scrumMasterName: "",
+    startDate: "1970-01-01",
   });
 
   // Add dev button clicked
@@ -36,21 +38,42 @@ function AddProductMenu({setErrorAndWait, setIsAddingProduct, fetchProducts}) {
   // One of the inputs (not developers, though) were changed
   const handleChange = (event) => {
     // Update corresponding field in edited product with input value
-    setEditedProduct({
-      ...editedProduct,
-      [event.target.name]: event.target.value,
-    });
+    // check target value !== "" because of weird date picker bug where certain invalid dates will fire an onchange with blank data.
+    if (event.target.value !== "") {
+      setEditedProduct({
+        ...editedProduct,
+        [event.target.name]: event.target.value,
+      });
+    }
   };
 
   // Save button clicked
   const handleCreate = () => {
-    const { developers, methodology, productName, productOwnerName, scrumMasterName, startDate } = editedProduct;
+    const {
+      developers,
+      methodology,
+      productName,
+      productOwnerName,
+      scrumMasterName,
+      startDate,
+    } = editedProduct;
 
     // Check if any fields are empty.
-    const emptyDevs = developers.filter((developer) => developer.trim().length === 0);
-    const requiredFields = [methodology, productName, productOwnerName, scrumMasterName, startDate];
-    const hasEmptyFields = emptyDevs.length > 0 || requiredFields.some((field) => field.trim().length === 0) || developers.length === 0;
-  
+    const emptyDevs = developers.filter(
+      (developer) => developer.trim().length === 0
+    );
+    const requiredFields = [
+      methodology,
+      productName,
+      productOwnerName,
+      scrumMasterName,
+      startDate,
+    ];
+    const hasEmptyFields =
+      emptyDevs.length > 0 ||
+      requiredFields.some((field) => field.trim().length === 0) ||
+      developers.length === 0;
+
     if (hasEmptyFields) {
       alert("Please fill out all fields.");
       return;
@@ -181,14 +204,14 @@ function AddProductMenu({setErrorAndWait, setIsAddingProduct, fetchProducts}) {
       </td>
       <td className="border px-2 py-1 align-top">
         {
-            <div className="w-full">
-              <button
-                className="w-full text-white font-bold px-1 my-0.5 rounded bg-green-500 hover:bg-green-600"
-                onClick={handleCreate}
-              >
-                Create
-              </button>
-            </div>
+          <div className="w-full">
+            <button
+              className="w-full text-white font-bold px-1 my-0.5 rounded bg-green-500 hover:bg-green-600"
+              onClick={handleCreate}
+            >
+              Create
+            </button>
+          </div>
         }
       </td>
     </tr>

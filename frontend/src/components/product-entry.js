@@ -42,10 +42,13 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
   // One of the inputs (not developers, though) were changed
   const handleChange = (event) => {
     // Update corresponding field in edited product with input value
-    setEditedProduct({
-      ...editedProduct,
-      [event.target.name]: event.target.value,
-    });
+    // check target value !== "" because of weird date picker bug where certain invalid dates will fire an onchange with blank data.
+    if (event.target.value !== "") {
+      setEditedProduct({
+        ...editedProduct,
+        [event.target.name]: event.target.value,
+      });
+    }
   };
 
   // Save button clicked
