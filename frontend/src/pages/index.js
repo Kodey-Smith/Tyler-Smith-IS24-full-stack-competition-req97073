@@ -1,26 +1,89 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ProductEntry from "../components/product-entry";
 
-const tableElementClasses = "border px-2 py-1 align-top";
-
 const IndexPage = () => {
-  const [products, setProducts] = useState(null);
-  useEffect(() => {
-    fetch(`http://localhost:3000/api/products`)
-      .then((response) => response.json())
-      .then((resultData) => {
-        setProducts(resultData);
-      });
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState(null);
+
+  const pingIntervalId = useRef(null);
+
+  function checkStatus() {
+    fetch("http://localhost:3000/api/ping")
+      .then((response) => {
+        if (response.status === 200) {
+          setError(null);
+          fetch(`http://localhost:3000/api/products`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Server not available");
+              }
+              return response.json();
+            })
+            .then((resultData) => {
+              setProducts(resultData);
+            })
+            .catch((error) => {})
+            .finally(() => {
+              setIsLoading(false);
+              clearInterval(pingIntervalId.current);
+            });
+        }
+      })
+      .catch((error) => console.log(error));
+  }
+
+  const setErrorAndWait = useCallback((msg) => {
+    setError(msg);
+    pingIntervalId.current = setInterval(checkStatus, 5000);
   }, []);
 
-  const [editingId, setEditingId] = useState(-1);
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/products`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Server not available");
+        }
+        return response.json();
+      })
+      .then((resultData) => {
+        setProducts(resultData);
+      })
+      .catch((error) => {
+        setErrorAndWait(
+          "Fetching products failed:\nAPI Likely down. The page will reload when the API is deemed operational."
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [setErrorAndWait]);
 
-  const handleNameChange = (e) => {
-    console.log(e);
-    //const newName = e.target.value;
-    //this.setState({
-    //  name: newName
-    //});
+  // Remove a product from the list of products
+  const removeProduct = (productId) => {
+    // Filter out removed product by ID
+    const updatedProducts = products.filter(
+      (product) => product.productId !== productId
+    );
+    setProducts(updatedProducts);
+  };
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    const filteredProducts = products.filter((product) =>
+      (
+        product.scrumMasterName.toLowerCase() +
+        product.developers.join(" ").toLowerCase()
+      ).includes(event.target.value.toLowerCase())
+    );
+    setFilteredProducts(filteredProducts);
+  };
+
+  const handleAddProduct = () => {
+    // Add new product to the list
   };
 
   return (
@@ -28,26 +91,69 @@ const IndexPage = () => {
       <h1 className="text-3xl font-bold underline mb-5 mt-1 w-full text-center">
         BC Webapp Manager Dashboard
       </h1>
-      <div className="flex w-full">
-        <table className="m-auto border-collapse table-auto text-sm">
-          <thead className="table-header-group">
-            <tr>
-              <th className={tableElementClasses}>ID</th>
-              <th className={tableElementClasses}>Name</th>
-              <th className={tableElementClasses}>Scrum Master</th>
-              <th className={tableElementClasses}>Owner</th>
-              <th className={tableElementClasses}>Developers</th>
-              <th className={tableElementClasses}>Start Date</th>
-              <th className={tableElementClasses}>Methodology</th>
-            </tr>
-          </thead>
-          <tbody>
-          {products && products.map((product) => (
-            <ProductEntry product={product} editingId={-1}></ProductEntry>
-          ))}
-          </tbody>
-        </table>
+      <div className="flex justify-center mb-5">
+        <input
+          type="text"
+          placeholder="Search developers / scrum masters..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="border border-gray-400 rounded py-2 px-3 w-1/2 max-w-2xl mr-2"
+        />
+        <button
+          onClick={handleAddProduct}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Product
+        </button>
       </div>
+      {isLoading ? (
+        <p className="w-full text-center text-green-500">Loading...</p>
+      ) : error ? (
+        <p className="w-full text-center text-red-500 whitespace-break-spaces">
+          {error}
+        </p>
+      ) : (
+        <div className="flex w-full">
+          <table className="m-auto border-collapse table-auto text-sm">
+            <thead className="table-header-group">
+              <tr>
+                <th className="border px-2 py-1 align-top text-left">ID</th>
+                <th className="border px-2 py-1 align-top text-left">Name</th>
+                <th className="border px-2 py-1 align-top text-left">
+                  Scrum Master
+                </th>
+                <th className="border px-2 py-1 align-top text-left">Owner</th>
+                <th className="border px-2 py-1 align-top text-left">
+                  Developers
+                </th>
+                <th className="border px-2 py-1 align-top text-left">
+                  Start Date
+                </th>
+                <th className="border px-2 py-1 align-top text-left">
+                  Methodology
+                </th>
+                {/*The following is an empty header for the edit row */}
+                <th className="border px-2 py-1 align-top text-left">
+                  Options
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Render product entries */}
+              {(filteredProducts === null ? products : filteredProducts).map(
+                (product) => (
+                  <ProductEntry
+                    key={product.productId}
+                    product={product}
+                    removeProduct={removeProduct}
+                    setErrorAndWait={setErrorAndWait}
+                  ></ProductEntry>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

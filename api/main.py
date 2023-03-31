@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import router
 
+# OpenAPI tags
 tags_metadata = [
     {
         "name": "Status",
@@ -14,6 +15,7 @@ tags_metadata = [
     },
 ]
 
+# Create fastapi instance
 app = FastAPI(
     title="BC Web Application Manager",
     description="Backend API for my attempt at the IS 24 Full Stack Developer Posting",
@@ -27,19 +29,18 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
-origins = [
-    "*",
-]
 
+# Add CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allow the frontend to access the backend.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Add the routes from the router in routes.py
 app.include_router(router, prefix="/api")
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=3000)
+    uvicorn.run(app, port=3000)  # run uvicorn on port 3000.
