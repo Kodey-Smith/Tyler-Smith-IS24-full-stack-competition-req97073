@@ -13,6 +13,7 @@ Open a terminal and navigate to the directory you wish to download the project t
  - ``cd Tyler-Smith-IS24-full-stack-competition-req97073``
  - ``pip install -r ./api/requirements.txt`` NOTE: you may need to use ``pip3`` or ``python3 -m pip`` in place of ``pip``, depending on your OS/Repo/Install method
  - ``cd frontend``
+ - ``npm install``
  - for production: ``gatsby build && gatsby serve``, or for development: ``gatsby develop``
 
 Open a new terminal/command prompt, ``cd`` back to the downloaded repo and run:
