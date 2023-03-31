@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ProductEntry from "../components/product-entry";
+import AddProductMenu from "../components/add-product-menu";
 
 const IndexPage = () => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(null);
@@ -84,9 +86,9 @@ const IndexPage = () => {
     setProducts(updatedProducts);
   };
 
-  
-  const handleAddProduct = () => {
-    // Add new product to the list
+
+  const handleAddProductButton = () => {
+    setIsAddingProduct(!isAddingProduct);
   };
 
   return (
@@ -103,10 +105,10 @@ const IndexPage = () => {
           className="border border-gray-400 rounded py-2 px-3 w-1/2 max-w-2xl mr-2"
         />
         <button
-          onClick={handleAddProduct}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={handleAddProductButton}
+          className={(isAddingProduct ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600") + " text-white font-bold py-2 px-4 rounded"}
         >
-          Add Product
+        {isAddingProduct ? "Cancel" : "Add New Product"}
         </button>
       </div>
       {isLoading ? (
@@ -142,6 +144,7 @@ const IndexPage = () => {
               </tr>
             </thead>
             <tbody>
+              {isAddingProduct ? <AddProductMenu setErrorAndWait={setErrorAndWait} setIsAddingProduct={setIsAddingProduct}></AddProductMenu> : null}
               {/* Render product entries */}
               {(filteredProducts === null ? products : filteredProducts).map(
                 (product) => (

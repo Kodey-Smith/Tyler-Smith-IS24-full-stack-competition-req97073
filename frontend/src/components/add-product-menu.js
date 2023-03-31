@@ -1,23 +1,17 @@
 import React, { useState } from "react";
 
-function ProductEntry({ product, removeProduct, setErrorAndWait }) {
+function AddProductMenu({setErrorAndWait, setIsAddingProduct}) {
   // Define state used for stacking and applying edits
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProduct, setEditedProduct] = useState(product);
-  const [currentProduct, setCurrentProduct] = useState(product);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Edit button clicked
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  // Cancel button clicked
-  const handleCancel = () => {
-    // Reset editing state
-    setIsEditing(false);
-    setEditedProduct(currentProduct);
-  };
+  const [editedProduct, setEditedProduct] = useState({
+    "developers": [
+      ""
+    ],
+    "methodology": "",
+    "productName": "",
+    "productOwnerName": "",
+    "scrumMasterName": "",
+    "startDate": "1970-01-01"
+  });
 
   // Add dev button clicked
   const handleAddDeveloper = () => {
@@ -49,10 +43,22 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
   };
 
   // Save button clicked
-  const handleSave = () => {
+  const handleCreate = () => {
+    const { developers, methodology, productName, productOwnerName, scrumMasterName, startDate } = editedProduct;
+
+    // Check if any fields are empty.
+    const emptyDevs = developers.filter((developer) => developer.trim().length === 0);
+    const requiredFields = [methodology, productName, productOwnerName, scrumMasterName, startDate];
+    const hasEmptyFields = emptyDevs.length > 0 || requiredFields.some((field) => field.trim().length === 0) || developers.length === 0;
+  
+    if (hasEmptyFields) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
     // Send POST to BCWS API with updated information
-    fetch(`http://localhost:3000/api/products/${product.productId}`, {
-      method: "POST",
+    fetch("http://localhost:3000/api/products", {
+      method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -65,46 +71,20 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
         }
         return res.json();
       })
-      .then((data) => setCurrentProduct(data))
+      .then(setIsAddingProduct(false))
       .catch((error) => {
         // If this fails, display an error and reload data once api healthy again.
         setErrorAndWait(
-          "Save product failed:\nAPI Likely down. The page will reload when the API is deemed operational."
+          "Add product failed:\nAPI Likely down. The page will reload when the API is deemed operational."
         );
       });
-
-    // Reset editing state
-    setIsEditing(false);
-  };
-
-  const handleDelete = (event) => {
-    if (isDeleting) {
-      // Send POST to BCWS API with updated information
-      fetch(`http://localhost:3000/api/products/${product.productId}`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Server not available");
-          }
-          removeProduct(product.productId);
-        })
-        .catch((error) => {
-          setErrorAndWait(
-            // If this fails, display an error and reload data once api healthy again.
-            "Delete product failed:\nAPI Likely down. The page will reload when the API is deemed operational."
-          );
-        });
-    } else {
-      setIsDeleting(true);
-    }
   };
 
   return (
-    <tr key={currentProduct.productId}>
-      <td className="border px-2 py-1 align-top">{currentProduct.productId}</td>
+    <tr>
+      <td className="border px-2 py-1 align-top">N/A</td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
+        {
           <input
             className="border px-1"
             type="text"
@@ -112,12 +92,10 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
             value={editedProduct.productName}
             onChange={handleChange}
           />
-        ) : (
-          currentProduct.productName
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
+        {
           <input
             className="border px-1"
             type="text"
@@ -125,12 +103,10 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
             value={editedProduct.scrumMasterName}
             onChange={handleChange}
           />
-        ) : (
-          currentProduct.scrumMasterName
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
+        {
           <input
             className="border px-1"
             type="text"
@@ -138,12 +114,10 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
             value={editedProduct.productOwnerName}
             onChange={handleChange}
           />
-        ) : (
-          currentProduct.productOwnerName
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top whitespace-break-spaces">
-        {isEditing ? (
+        {
           <div>
             {editedProduct.developers.map((developer, index) => (
               <div key={index} className="flex items-center">
@@ -180,12 +154,10 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
               </button>
             </div>
           </div>
-        ) : (
-          currentProduct.developers.join("\n")
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
+        {
           <input
             className="border px-1"
             type="date"
@@ -193,12 +165,10 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
             value={editedProduct.startDate}
             onChange={handleChange}
           />
-        ) : (
-          currentProduct.startDate
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
+        {
           <input
             className="border px-1 w-20"
             type="text"
@@ -206,52 +176,22 @@ function ProductEntry({ product, removeProduct, setErrorAndWait }) {
             value={editedProduct.methodology}
             onChange={handleChange}
           />
-        ) : (
-          currentProduct.methodology
-        )}
+        }
       </td>
       <td className="border px-2 py-1 align-top">
-        {isEditing ? (
-          <div className="flex flex-col">
+        {
             <div className="w-full">
               <button
                 className="w-full text-white font-bold px-1 my-0.5 rounded bg-green-500 hover:bg-green-600"
-                onClick={handleSave}
+                onClick={handleCreate}
               >
-                Save
+                Create
               </button>
             </div>
-            <div className="w-full">
-              <button
-                className="w-full text-white font-bold px-1 my-0.5 rounded bg-red-500 hover:bg-red-600"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <button
-              className="w-full text-white font-bold px-1 my-0.5 rounded bg-blue-500 hover:bg-blue-600"
-              onClick={handleEdit}
-            >
-              Edit
-            </button>
-            <button
-              className="w-full text-white font-bold px-1 my-0.5 rounded bg-red-500 hover:bg-red-600"
-              onClick={handleDelete}
-              onMouseLeave={(event) => {
-                setIsDeleting(false);
-              }}
-            >
-              {isDeleting ? "Confirm" : "Delete"}
-            </button>
-          </>
-        )}
+        }
       </td>
     </tr>
   );
 }
 
-export default ProductEntry;
+export default AddProductMenu;
