@@ -11,38 +11,9 @@ const IndexPage = () => {
 
   const pingIntervalId = useRef(null);
 
-  function checkStatus() {
-    fetch("http://localhost:3000/api/ping")
-      .then((response) => {
-        if (response.status === 200) {
-          setError(null);
-          fetch(`http://localhost:3000/api/products`)
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Server not available");
-              }
-              return response.json();
-            })
-            .then((resultData) => {
-              setProducts(resultData);
-            })
-            .catch((error) => {})
-            .finally(() => {
-              setIsLoading(false);
-              clearInterval(pingIntervalId.current);
-            });
-        }
-      })
-      .catch((error) => console.log(error));
-  }
 
-  const setErrorAndWait = useCallback((msg) => {
-    setError(msg);
-    pingIntervalId.current = setInterval(checkStatus, 5000);
-  }, []);
-
-  useEffect(() => {
-    fetch(`http://localhost:3000/api/products`)
+  const fetchProducts = useCallback(() => {
+    return fetch(`http://localhost:3000/api/products`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Server not available");
@@ -51,25 +22,46 @@ const IndexPage = () => {
       })
       .then((resultData) => {
         setProducts(resultData);
+        return true;
       })
       .catch((error) => {
-        setErrorAndWait(
-          "Fetching products failed:\nAPI Likely down. The page will reload when the API is deemed operational."
-        );
+        return false;
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [setErrorAndWait]);
+  }, [setProducts, setIsLoading]);
 
-  // Remove a product from the list of products
-  const removeProduct = (productId) => {
-    // Filter out removed product by ID
-    const updatedProducts = products.filter(
-      (product) => product.productId !== productId
-    );
-    setProducts(updatedProducts);
-  };
+
+  const checkStatus = useCallback(() => {
+    fetch("http://localhost:3000/api/ping")
+      .then((response) => {
+        if (response.status === 200) {
+          fetchProducts();
+          setError(null);
+          clearInterval(pingIntervalId.current);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, [fetchProducts]);
+
+
+  const setErrorAndWait = useCallback((msg) => {
+    setError(msg);
+    pingIntervalId.current = setInterval(checkStatus, 5000);
+  }, [checkStatus]);
+
+
+  useEffect(() => {
+    fetchProducts().then((result) => {
+      if (!result) {
+        setErrorAndWait(
+          "Getting products failed:\nAPI Likely down. The page will reload when the API is deemed operational."
+        );
+      }
+    });
+  }, [fetchProducts, setErrorAndWait]);
+
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -82,6 +74,17 @@ const IndexPage = () => {
     setFilteredProducts(filteredProducts);
   };
 
+
+  // Remove a product from the list of products
+  const removeProduct = (productId) => {
+    // Filter out removed product by ID
+    const updatedProducts = products.filter(
+      (product) => product.productId !== productId
+    );
+    setProducts(updatedProducts);
+  };
+
+  
   const handleAddProduct = () => {
     // Add new product to the list
   };
